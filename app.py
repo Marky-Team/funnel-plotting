@@ -10,8 +10,7 @@ Original file is located at
 [video walkthrough](https://www.loom.com/share/973078f6535b411496824e8219c2c437)
 """
 
-# !pip install gspread pandas gspread_dataframe
-
+import streamlit as st
 from google.colab import auth
 auth.authenticate_user()
 
@@ -65,14 +64,6 @@ ads_by_day = (
     .rename(columns={'Day': 'date'})
     .assign(date=lambda df: pd.to_datetime(df['date']))
     .set_index('date')
-    # .resample('D')
-    # .apply(lambda x: pd.Series({
-    #     'CAC': (x['Cost per purchase'] * x['Purchases']).sum() / x['Purchases'].sum(),
-    #     'CPC': (x['CPC (cost per link click)'] * x['Link clicks']).sum() / x['Link clicks'].sum(),
-    #     'Ad Spend': x['Amount spent (USD)'].sum(),
-    #     'Clicks': x['Link clicks'].mean(),
-    #     'Purchases': x['Purchases'].sum(),
-    # }))
 )
 
 spend_cp = (
@@ -89,7 +80,9 @@ merged_data = spend_cp.join(ads_by_day, how='inner')
 #@title Get data to plot
 import plotly.express as px
 
-grouping_period = "daily" #@param ["daily", "weekly", "monthly"]
+st.title("Funnel Analysis")
+
+grouping_period = st.selectbox("Select Grouping Period", ["daily", "weekly", "monthly"])
 grouping_map = {
     "daily": "D",
     "weekly": "W-Mon",
@@ -138,8 +131,6 @@ count_data_to_plot = (
      }))
 )
 
-import plotly.express as px
-
 # Figure 1: Users Created
 users_created_fig = px.line(
     (users_cp
@@ -150,7 +141,7 @@ users_created_fig = px.line(
     height=400,
 )
 users_created_fig.update_xaxes(title_text="")
-users_created_fig.show()
+st.plotly_chart(users_created_fig)
 
 # Figure 2: User Funnel
 user_funnel_fig = px.line(
@@ -160,7 +151,7 @@ user_funnel_fig = px.line(
     height=400,
 )
 user_funnel_fig.update_xaxes(title_text="")
-user_funnel_fig.show()
+st.plotly_chart(user_funnel_fig)
 
 # Figure 3: CAC vs Spend
 cac_spend_fig = px.line(
@@ -170,7 +161,7 @@ cac_spend_fig = px.line(
     height=400,
 )
 cac_spend_fig.update_xaxes(title_text="")
-cac_spend_fig.show()
+st.plotly_chart(cac_spend_fig)
 
 # Figure 4: Count Data
 count_fig = px.line(
@@ -180,92 +171,4 @@ count_fig = px.line(
     height=400,
 )
 count_fig.update_xaxes(title_text="")
-count_fig.show()
-
-# @title Alternative way to plot with subplots
-
-
-# from plotly.subplots import make_subplots
-
-# # Create subplots with shared x-axis
-# fig = make_subplots(
-#     rows=4,
-#     cols=1,
-#     shared_xaxes=True,
-#     vertical_spacing=0.1,
-#     subplot_titles=("Users Created", "User Funnel", "Purchase Data", "Count Data")
-# )
-
-
-# user_funnel_fig = px.line(
-#     (users
-#       .resample(grouping_map[grouping_period])
-#       .size().rename('Users Created')),
-#     labels={"index": "Date", "value": "Percentage"}
-# )
-# for trace in user_funnel_fig.data:
-#     fig.add_trace(trace, row=1, col=1)
-
-# user_funnel_fig = px.line(
-#     user_data_to_plot,
-#     labels={"index": "Date", "value": "Percentage"}
-# )
-# for trace in user_funnel_fig.data:
-#     fig.add_trace(trace, row=2, col=1)
-
-
-# cac_spend_fig = px.line(
-#     usd_data_to_plot,
-#     labels={'value': 'USD', 'date': 'Date'}
-# )
-# for trace in cac_spend_fig.data:
-#     fig.add_trace(trace, row=3, col=1)
-
-# count_fig = px.line(
-#     count_data_to_plot,
-#     labels={'value': 'USD', 'date': 'Date'}
-# )
-# for trace in count_fig.data:
-#     fig.add_trace(trace, row=4, col=1)
-
-
-# fig.update_layout(
-#     height=800,
-#     yaxis1_title="Count",
-#     yaxis2_title="Percent",
-#     yaxis3_title="USD",
-#     yaxis4_title="Count",
-#     template="plotly_white",  # Clean aesthetic
-# )
-
-# fig.show()
-
-pcts = (
-    (users_cp[users_cp.index == '2024-11-18'].agg({
-    # 'date': 'count',
-    'has_email': 'mean',
-    'has_name': 'mean',
-    'has_business': 'mean',
-    'has_post': 'mean',
-    'has_subscription': 'mean',
-    }) * 100)
-    .astype(int)
-).rename('pct')
-
-counts = (
-    (users_cp[users_cp.index == '2024-11-18'].agg({
-    'date': 'count',
-    'has_email': 'sum',
-    'has_name': 'sum',
-    'has_business': 'sum',
-    'has_post': 'sum',
-    'has_subscription': 'sum',
-    }))
-    .astype(int)
-).rename('count')
-
-pd.concat([pcts, counts], axis=1)
-
-users_cp[(users_cp.index == '2024-11-18') & (users_cp.has_email)].email.sort_values()
-
-# kizmandy1@gmail.com
+st.plotly_chart(count_fig)
