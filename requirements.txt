@@ -2,3 +2,4 @@ gspread
 pandas
 gspread_dataframe
 streamlit
+plotly
