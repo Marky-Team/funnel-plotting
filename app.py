@@ -5,7 +5,7 @@
 [video walkthrough](https://www.loom.com/share/973078f6535b411496824e8219c2c437)
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import streamlit as st
 import os
@@ -78,11 +78,39 @@ spend_cp = (
 merged_data = spend_cp.join(ads_by_day, how='inner')
 
 # PLOT IT BABY!
+st.title("Funnel Analysis")
+
+grouping_period = st.selectbox("Select Grouping Period", ["daily", "weekly", "monthly"])
+if grouping_period == "daily":
+    show_sundays = st.checkbox("Show Sundays", value=True)
+
+grouping_map = {
+    "daily": "D",
+    "weekly": "W-Mon",
+    "monthly": "M",
+}
+
 vertical_lines = {
     "Appsumo Start": datetime(2024, 3, 18),
     "Appsumo End": datetime(2024, 5, 20),
     # "New Landing?": datetime(2024, 6, 3),
 }
+
+# get sun of every week of Jan 4
+# Function to get all Sundays in a given year
+def get_sundays(year):
+    # Start from the first day of the year
+    dt = datetime(year, 1, 1)
+    # Find the first Sunday
+    dt += timedelta(days=6 - dt.weekday())
+    # Generate all Sundays in the year
+    sundays = []
+    while dt.year == year:
+        sundays.append(dt)
+        dt += timedelta(weeks=1)
+    return sundays
+
+sundays = get_sundays(2024)
 
 def add_vertical_lines(fig):
     """Add vertical lines to the plot for specific events."""
@@ -94,16 +122,20 @@ def add_vertical_lines(fig):
             annotation_text=name,
             annotation_position="top",
         )
+    if grouping_period == "daily" and show_sundays:
+        for sunday in sundays:
+            if sunday > merged_data.index.max():
+                break
+            fig.add_vline(
+                x=sunday.timestamp() * 1000,
+                line_dash='dash',
+                line_color='blue',
+                opacity=0.1,
+                # annotation_text=name,
+                # annotation_position="top",
+            )
     return fig
 
-st.title("Funnel Analysis")
-
-grouping_period = st.selectbox("Select Grouping Period", ["daily"])#, "weekly", "monthly"])
-grouping_map = {
-    "daily": "D",
-    "weekly": "W-Mon",
-    "monthly": "M",
-}
 
 user_data_to_plot = (users_cp
   .resample(grouping_map[grouping_period]).agg({
