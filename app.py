@@ -5,6 +5,7 @@
 [video walkthrough](https://www.loom.com/share/973078f6535b411496824e8219c2c437)
 """
 
+from datetime import datetime
 import json
 import streamlit as st
 import os
@@ -77,9 +78,27 @@ spend_cp = (
 merged_data = spend_cp.join(ads_by_day, how='inner')
 
 # PLOT IT BABY!
+vertical_lines = {
+    "Appsumo Start": datetime(2024, 3, 18),
+    "Appsumo End": datetime(2024, 5, 20),
+    # "New Landing?": datetime(2024, 6, 3),
+}
+
+def add_vertical_lines(fig):
+    """Add vertical lines to the plot for specific events."""
+    for name, line in vertical_lines.items():
+        fig.add_vline(
+            # https://github.com/plotly/plotly.py/issues/3065
+            x=line.timestamp() * 1000,
+            line={"color": 'red', "dash": 'dash'},
+            annotation_text=name,
+            annotation_position="top",
+        )
+    return fig
+
 st.title("Funnel Analysis")
 
-grouping_period = st.selectbox("Select Grouping Period", ["daily", "weekly", "monthly"])
+grouping_period = st.selectbox("Select Grouping Period", ["daily"])#, "weekly", "monthly"])
 grouping_map = {
     "daily": "D",
     "weekly": "W-Mon",
@@ -129,16 +148,25 @@ count_data_to_plot = (
 )
 
 # Figure 1: Users Created
+funnel_ordering = [
+    'has_business',
+    'has_post',
+    'has_email',
+    'has_name',
+    'has_subscription',
+]
+user_count_data_to_plot = (
+   users_cp[funnel_ordering]
+   .resample(grouping_map[grouping_period])
+   .sum())
 users_created_fig = px.line(
-    (users_cp
-      .resample(grouping_map[grouping_period])
-      .size().rename('Users Created')),
+    user_count_data_to_plot,
     labels={"index": "Date", "value": "Count"},
-    title="Users Created",
+    title="Users Funnel Counts",
     height=400,
 )
 users_created_fig.update_xaxes(title_text="")
-st.plotly_chart(users_created_fig)
+st.plotly_chart(add_vertical_lines(users_created_fig))
 
 # Figure 2: User Funnel
 user_funnel_fig = px.line(
@@ -148,7 +176,7 @@ user_funnel_fig = px.line(
     height=400,
 )
 user_funnel_fig.update_xaxes(title_text="")
-st.plotly_chart(user_funnel_fig)
+st.plotly_chart(add_vertical_lines(user_funnel_fig))
 
 # Figure 3: CAC vs Spend
 cac_spend_fig = px.line(
@@ -158,7 +186,7 @@ cac_spend_fig = px.line(
     height=400,
 )
 cac_spend_fig.update_xaxes(title_text="")
-st.plotly_chart(cac_spend_fig)
+st.plotly_chart(add_vertical_lines(cac_spend_fig))
 
 # Figure 4: Count Data
 count_fig = px.line(
@@ -168,4 +196,4 @@ count_fig = px.line(
     height=400,
 )
 count_fig.update_xaxes(title_text="")
-st.plotly_chart(count_fig)
+st.plotly_chart(add_vertical_lines(count_fig))
