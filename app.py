@@ -93,7 +93,7 @@ grouping_map = {
 vertical_lines = {
     "Appsumo Start": datetime(2024, 3, 18),
     "Appsumo End": datetime(2024, 5, 20),
-    # "New Landing?": datetime(2024, 6, 3),
+    "New Landing?": datetime(2024, 6, 4),
 }
 
 # get sun of every week of Jan 4
