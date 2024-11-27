@@ -142,7 +142,7 @@ sundays = get_sundays(2024)
 
 def add_vertical_lines(fig):
     """Add vertical lines to the plot for specific events."""
-    for i, name in enumerate(selected_plots):
+    for name in selected_plots:
         date_of_event = key_event_dates[name]
         is_start = "start" in name.lower()
         is_merge = "merge" in name.lower()
@@ -154,7 +154,7 @@ def add_vertical_lines(fig):
                             else 'red'),
                   "dash": 'dash'},
             annotation_text=name,
-            annotation_position="top" if i % 2 == 0 else "bottom",
+            annotation_position="top",
         )
     if grouping_period == "daily" and show_sundays:
         for sunday in sundays:
