@@ -81,6 +81,7 @@ merged_data = spend_cp.join(ads_by_day, how='inner')
 st.title("Funnel Analysis")
 
 grouping_period = st.selectbox("Select Grouping Period", ["daily", "weekly", "monthly"])
+show_sundays = False
 if grouping_period == "daily":
     show_sundays = st.checkbox("Show Sundays", value=True)
 
@@ -91,9 +92,12 @@ grouping_map = {
 }
 
 vertical_lines = {
+    "Trial-Deal End": datetime(2024, 1, 25),
     "Appsumo Start": datetime(2024, 3, 18),
     "Appsumo End": datetime(2024, 5, 20),
     "New Landing?": datetime(2024, 6, 4),
+    "$1-Deal Start": datetime(2024, 3, 24),
+    "$1-Deal End": datetime(2024, 6, 4),
 }
 
 # get sun of every week of Jan 4
@@ -115,10 +119,12 @@ sundays = get_sundays(2024)
 def add_vertical_lines(fig):
     """Add vertical lines to the plot for specific events."""
     for name, line in vertical_lines.items():
+        is_start = "start" in name.lower()
         fig.add_vline(
             # https://github.com/plotly/plotly.py/issues/3065
             x=line.timestamp() * 1000,
-            line={"color": 'red', "dash": 'dash'},
+            line={"color": 'green' if is_start else 'red',
+                  "dash": 'dash'},
             annotation_text=name,
             annotation_position="top",
         )
