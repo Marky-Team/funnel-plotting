@@ -99,6 +99,11 @@ key_event_dates = {
     "New Landing?": datetime(2024, 6, 4),
     "$1-Deal Start": datetime(2024, 3, 24),
     "$1-Deal End": datetime(2024, 6, 4),
+    "Merge 892": datetime(2024, 5, 11),
+    "Merge ed0": datetime(2024, 5, 24),
+    "Merge d67": datetime(2024, 5, 30),
+    "Merge 359": datetime(2024, 6, 4),
+    "Merge 863": datetime(2024, 6, 4),
 }
 key_events = list(key_event_dates.keys())
 selected_plots = st.sidebar.multiselect(
@@ -140,10 +145,13 @@ def add_vertical_lines(fig):
     for name in selected_plots:
         date_of_event = key_event_dates[name]
         is_start = "start" in name.lower()
+        is_merge = "merge" in name.lower()
         fig.add_vline(
             # https://github.com/plotly/plotly.py/issues/3065
             x=date_of_event.timestamp() * 1000,
-            line={"color": 'green' if is_start else 'red',
+            line={"color": ('green' if is_start
+                            else 'gray' if is_merge
+                            else 'red'),
                   "dash": 'dash'},
             annotation_text=name,
             annotation_position="top",
