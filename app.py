@@ -96,7 +96,7 @@ key_event_dates = {
     "Trial-Deal End": datetime(2024, 1, 25),
     "Appsumo Start": datetime(2024, 3, 18),
     "Appsumo End": datetime(2024, 5, 20),
-    "New Landing?": datetime(2024, 6, 4),
+    "New Landing": datetime(2024, 6, 4),
     "$1-Deal Start": datetime(2024, 3, 24),
     "$1-Deal End": datetime(2024, 6, 4),
     "Merge 892": datetime(2024, 5, 11),
