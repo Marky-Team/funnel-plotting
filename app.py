@@ -80,10 +80,11 @@ merged_data = spend_cp.join(ads_by_day, how='inner')
 # PLOT IT BABY!
 st.title("Funnel Analysis")
 
-grouping_period = st.selectbox("Select Grouping Period", ["daily", "weekly", "monthly"])
+grouping_period = st.sidebar.selectbox("Select Grouping Period",
+                                       ["daily", "weekly", "monthly"])
 show_sundays = False
 if grouping_period == "daily":
-    show_sundays = st.checkbox("Show Sundays", value=True)
+    show_sundays = st.sidebar.checkbox("Show Sundays", value=True)
 
 grouping_map = {
     "daily": "D",
@@ -100,9 +101,23 @@ key_event_dates = {
     "$1-Deal End": datetime(2024, 6, 4),
 }
 key_events = list(key_event_dates.keys())
-selected_plots = st.multiselect("Select Key Events to Display",
-                                options=key_events,
-                                default=key_events)
+selected_plots = st.sidebar.multiselect(
+    "Select Key Events to Display",
+    options=key_events,
+    default=key_events,
+)
+
+plots_to_show_options = [
+    "Users Created",
+    "User Funnel",
+    "CAC vs Spend",
+    "Ad Count Data",
+]
+plots_to_show = st.sidebar.multiselect(
+    "Select Plots to Display",
+    options=plots_to_show_options,
+    default=plots_to_show_options,
+)
 
 # get sun of every week of Jan 4
 # Function to get all Sundays in a given year
@@ -209,7 +224,8 @@ users_created_fig = px.line(
     height=400,
 )
 users_created_fig.update_xaxes(title_text="")
-st.plotly_chart(add_vertical_lines(users_created_fig))
+if "Users Created" in plots_to_show:
+    st.plotly_chart(add_vertical_lines(users_created_fig))
 
 # Figure 2: User Funnel
 user_funnel_fig = px.line(
@@ -219,7 +235,8 @@ user_funnel_fig = px.line(
     height=400,
 )
 user_funnel_fig.update_xaxes(title_text="")
-st.plotly_chart(add_vertical_lines(user_funnel_fig))
+if "User Funnel" in plots_to_show:
+    st.plotly_chart(add_vertical_lines(user_funnel_fig))
 
 # Figure 3: CAC vs Spend
 cac_spend_fig = px.line(
@@ -229,7 +246,8 @@ cac_spend_fig = px.line(
     height=400,
 )
 cac_spend_fig.update_xaxes(title_text="")
-st.plotly_chart(add_vertical_lines(cac_spend_fig))
+if "CAC vs Spend" in plots_to_show:
+    st.plotly_chart(add_vertical_lines(cac_spend_fig))
 
 # Figure 4: Count Data
 count_fig = px.line(
@@ -239,4 +257,5 @@ count_fig = px.line(
     height=400,
 )
 count_fig.update_xaxes(title_text="")
-st.plotly_chart(add_vertical_lines(count_fig))
+if "Ad Count Data" in plots_to_show:
+    st.plotly_chart(add_vertical_lines(count_fig))
