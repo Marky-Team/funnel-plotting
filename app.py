@@ -91,7 +91,7 @@ grouping_map = {
     "monthly": "M",
 }
 
-vertical_lines = {
+key_event_dates = {
     "Trial-Deal End": datetime(2024, 1, 25),
     "Appsumo Start": datetime(2024, 3, 18),
     "Appsumo End": datetime(2024, 5, 20),
@@ -99,6 +99,10 @@ vertical_lines = {
     "$1-Deal Start": datetime(2024, 3, 24),
     "$1-Deal End": datetime(2024, 6, 4),
 }
+key_events = list(key_event_dates.keys())
+selected_plots = st.multiselect("Select Key Events to Display",
+                                options=key_events,
+                                default=key_events)
 
 # get sun of every week of Jan 4
 # Function to get all Sundays in a given year
@@ -118,11 +122,12 @@ sundays = get_sundays(2024)
 
 def add_vertical_lines(fig):
     """Add vertical lines to the plot for specific events."""
-    for name, line in vertical_lines.items():
+    for name in selected_plots:
+        date_of_event = key_event_dates[name]
         is_start = "start" in name.lower()
         fig.add_vline(
             # https://github.com/plotly/plotly.py/issues/3065
-            x=line.timestamp() * 1000,
+            x=date_of_event.timestamp() * 1000,
             line={"color": 'green' if is_start else 'red',
                   "dash": 'dash'},
             annotation_text=name,
